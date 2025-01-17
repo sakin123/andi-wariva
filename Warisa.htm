@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Chatbot with Math</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+      overflow: scroll;
+    }
+
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    #chat-container {
+      position: absolute;
+      width: 100%;
+      height: 150px;
+      background: transparent;
+      bottom: 0;
+      left: 0;
+      z-index: 2;
+      transition: 2s;
+    }
+
+    #chat-messages {
+      width: 100%;
+      height: 300px;
+      border: none;
+      background: transparent;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+      font-size: 1.25rem;
+      overflow: scroll;
+    }
+
+    #user-input {
+      background: transparent;
+      position: absolute;
+      border: none;
+      bottom: 115px;
+      left: 0;
+      width: 100%;
+      height: 0px;
+      padding: 0px;
+      border-radius: 5px;
+      border-bottom: 1px solid orangered;
+      font-size: 1rem;
+      transition: 1s;
+      color: aqua;
+    }
+
+    .speak-btn {
+      width: 100px;
+      height: 45px;
+      padding: 5px;
+      border: none;
+      border-radius: 5px;
+      background: #E10202;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .btn {
+      width: 80px;
+      margin: 5px;
+      height: 35px;
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      background: #E10202;
+      color: white;
+      font-size: 1rem;
+    }
+
+    iframe {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0;
+      height: 0;
+      border: none;
+      z-index: 2;
+      transition: 1s;
+      background: white;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(rgba(255, 0, 0, 0.71), rgba(255, 0, 0, 0.71));
+      z-index: 4;
+      color: white;
+    }
+
+    #commandList {
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 3;
+      width: 0px;
+      height: 100%;
+      background: white;
+      transition: 0.5s;
+    }
+
+    pre {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="commandList">
+    <pre id="pre">
+  arise
+  reload programme 
+  explain your functionalities
+  tell me about your features
+  can you speak bangla
+  hello 
+  fantastic
+  recite a poem
+  open prothom alo / wikipedia
+  play distance 
+  tell me a joke
+  show me your mentality
+  refresh
+  stop 
+  andy
+  source code
+</pre>
+  </div>
+  <div class="cover" id="playButton">
+    <h2>Click anywhere to start</h2>
+  </div>
+  <video id="play" loop muted>
+    <source id="video" src="./audio/fav.mp4" type="video/mp4">
+  </video>
+  <div id="chat-messages"></div>
+  <audio id="default" src="./audio/techSound.mp3" loop></audio>
+  <audio id="audio" src="" loop></audio>
+  <audio id="start" src="./audio/welcome.mp3"></audio>
+  <div class="buttons">
+    <button id="speak-btn" class="speak-btn btn">Speak</button>
+    <button id="menu" class="btn" onclick="interactOp()">Menu</button>
+    <button id="theme" class="btn" onclick="theme()">Theme</button>
+    <button id="cmd" class="btn">command</button>
+    <button id="open" class="btn">open</button>
+  </div>
+  <iframe id="iframe-display" src=""></iframe>
+  <div id="chat-container">
+    <div id="chat-box">
+      <div id="input-bar">
+        <input type="text" id="user-input" placeholder="Ask your question...">
+      </div>
+    </div>
+  </div>
+  <audio id="audio-player" src="./audio/distance.mp3"></audio>
+  <script>
+    let srcCode = `
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Chatbot with Math</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    #chat-container {
+      position: absolute;
+      width: 100%;
+      height: 150px;
+      background: transparent;
+      bottom: 0;
+      left: 0;
+      z-index: 2;
+      transition: 2s;
+    }
+
+    #chat-messages {
+      width: 100%;
+      height: 300px;
+      border: none;
+      background: transparent;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+      font-size: 1.25rem;
+      overflow: scroll;
+    }
+
+    #user-input {
+      background: transparent;
+      position: absolute;
+      border: none;
+      bottom: 115px;
+      left: 0;
+      width: 100%;
+      height: 0px;
+      padding: 0px;
+      border-radius: 5px;
+      border-bottom: 1px solid orangered;
+      font-size: 1rem;
+      transition: 1s;
+      color: aqua;
+    }
+
+    .speak-btn {
+      width: 100px;
+      height: 45px;
+      padding: 5px;
+      border: none;
+      border-radius: 5px;
+      background: #E10202;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .btn {
+      width: 80px;
+      margin: 5px;
+      height: 35px;
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      background: #E10202;
+      color: white;
+      font-size: 1rem;
+    }
+
+    iframe {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0;
+      height: 0;
+      border: none;
+      z-index: 2;
+      transition: 1s;
+      background: white;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(rgba(255, 0, 0, 0.71), rgba(255, 0, 0, 0.71));
+      z-index: 4;
+      color: white;
+    }
+
+    #commandList {
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 3;
+      width: 0px;
+      height: 100%;
+      background: white;
+      transition: 0.5s;
+    }
+    pre {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="commandList">
+    <pre id="pre">
+  arise
+  reload programme 
+  explain your functionalities
+  tell me about your features
+  can you speak bangla
+  hello 
+  fantastic
+  recite a poem
+  open prothom alo / wikipedia
+  play distance 
+  tell me a joke
+  show me your mentality
+  refresh
+  stop 
+  andi
+  source code
+</pre>
+  </div>
+  <div class="cover" id="playButton">
+    <h2>Click anywhere to start</h2>
+  </div>
+  <video id="play" loop muted>
+    <source id="video" src="./audio/fav.mp4" type="video/mp4">
+  </video>
+  <div id="chat-messages"></div>
+  <audio id="default" src="./audio/techSound.mp3" loop></audio>
+  <audio id="audio" src="" loop></audio>
+  <audio id="start" src="./audio/welcome.mp3"></audio>
+  <div class="buttons">
+    <button id="speak-btn" class="speak-btn btn">Speak</button>
+    <button id="menu" class="btn" onclick="interactOp()">Menu</button>
+    <button id="theme" class="btn" onclick="theme()">Theme</button>
+    <button id="cmd" class="btn">command</button>
+    <button id="open" class="btn">open</button>
+  </div>
+  <iframe id="iframe-display" src=""></iframe>
+  <div id="chat-container">
+    <div id="chat-box">
+      <div id="input-bar">
+        <input type="text" id="user-input" placeholder="Ask your question...">
+      </div>
+    </div>
+  </div>
+  <audio id="audio-player" src="./audio/distance.mp3"></audio>
+  <script>
+    const messagesDiv = document.getElementById("chat-messages");
+    const userInput = document.getElementById("user-input");
+    const speakButton = document.getElementById("speak-btn");
+    const audioPlayer = document.getElementById("audio-player");
+    const iframe = document.getElementById("iframe-display");
+
+    const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    let lastTranscript = "";
+    let isListening = false;
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[event.results.length - 1][0].transcript.trim();
+      if (transcript === lastTranscript) return;
+      lastTranscript = transcript;
+
+      addMessage("User", transcript);
+      processCommand(transcript.toLowerCase());
+      stopRecognition();
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      stopRecognition();
+    };
+
+    function startRecognition() {
+      recognition.start();
+      speakButton.textContent = "Listening...";
+      isListening = true;
+    }
+
+    function stopRecognition() {
+      recognition.stop();
+      speakButton.textContent = "Speak";
+      isListening = false;
+    }
+
+    speakButton.addEventListener("click", () => {
+      if (!isListening) {
+        startRecognition();
+      } else {
+        stopRecognition();
+      }
+    });
+
+    const synth = window.speechSynthesis;
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      synth.speak(utterance);
+      addMessage("Wariva", text);
+    }
+
+    function addMessage(sender, message) {
+      const messageElement = document.createElement("div");
+      messageElement.textContent = "sender}: message}";
+      messagesDiv.appendChild(messageElement);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function processCommand(command) {
+      if (command.includes("play distance")) {
+        audioPlayer.play();
+        speak("Playing distance.");
+      } else if (command.includes("stop")) {
+        audioPlayer.pause();
+        speak("stop");
+      } else if (command.includes("open prothom alo")) {
+        iframe.style.height = "90%";
+        iframe.style.width = "90%";
+        iframe.src = "https://www.prothomalo.com";
+        speak("Opening prothom alo.");
+      } else if (isMathExpression(command)) {
+        const result = calculateExpression(command);
+        speak("The result is result},easy peasy");
+      } else if (command.includes("andy")) {
+        iframe.style.height = "70%";
+        iframe.style.width = "90%";
+        iframe.src = "https://andisearch.com/";
+        iframe.style.zIndex = '5';
+        speak("andi activated sir.");
+      } else if (command.includes("refresh")) {
+        iframe.style.height = "0%";
+        iframe.style.width = "0%";
+        speak("refreshing sir.");
+      } else if (command.includes('hello')) {
+        speak("hello sir,I am wariva.Do you need any help?");
+      } else if (command.includes('reload programme')) {
+        speak("programme is reloaded.Wariva is ready to run");
+      } else if (command.includes('arise')) {
+        speak(
+          "Wariva activated sir.Hello sir,allow me to introduce myself,I am wariva.Your wide range architectural vertual artificial intelligence,and i am here to assist you with a variety of tasks as best a I can,24 hours a day,7 days a week.Importing all preferences from home inerface.System are now fully operational."
+        );
+      } else if (command.includes('explain your functionalities')) {
+        speak(
+          "Sure sir.I am created with html,css and javascript.Html and css for my user interface and javascript works as my functional tasks.My full name is Andi Wariva PI Zero One.Pi Zero One means Point Infinity One.It indicates my version.However you can get my source code if you say 'source code'"
+        );
+      } else if (command.includes('say hello to my sir')) {
+        speak("hello,Probir sir.Nice meeting you.How are you?");
+      } else if (command.includes('say hello to my friends')) {
+        speak("Hello every one.How are you?Hey Warisa!What's up?Do you like it?");
+      } else if (command.includes('tell me about your features')) {
+        speak(
+          "I can do basic mathematical operation,I can play song for you,can hear u joke and can motivate you by generating quotes and i can also recite poem.I can answer any of your out knowledge and general related question as i am collaborated with andi search engine.Just say andi to activate it and then write your question.It can also help you in generating paragraph and story writing and many more.I can also open prothom alo and wikipedia if needed.If you click the open button u can open any website by writing the domain in it"
+        );
+      } else if (command.includes("open wikipedia")) {
+        iframe.style.height = "90%";
+        iframe.style.width = "90%";
+        iframe.src = "https://bn.m.wikipedia.org/wiki/";
+        speak("opening wikipedia.");
+      } else if (command.includes("show me your mentality")) {
+        iframe.style.height = "80%";
+        iframe.style.width = "80%";
+        iframe.src = "https://www.youtube.com/embed/w7fmbiQzp5k?si=hifIHjhy-KbFw_KN";
+        speak("this video reflects my mentality sir.");
+      } else if (command.includes('can you speak bangla')) {
+        speak(
+          "আমি একটু আক্ টু বাংলা বলতে পারি।তবে আপনি আমার সাথে বাংলায় কথা বলতে বা টেক্সট করতে পারবেন না যেহেতু আমার বাংলা ভাষা প্রোগ্রাম করা নাই।তবে আমি আপনাকে বাংলায় কৌতুক আর কবিতা শোনাতে পারি"
+        );
+      } else if (command.includes('tell me a joke')) {
+        speak(""ছ্যার:বল্টু,বলো দেখি?চাঁদ দূরে?নাকি লন্ডন দূরে?
+               বল্টু:লন্ডন দূরে ছ্যার।
+               ছ্যার:কেন?
+               বল্টু:ছ্যার!আমার বাসা থেকে তো আকাশে চাঁদ দেখা যায়,তবে লন্ডন তো দেখা যায় না।""}"");
+      } else if (command.includes('recite a poem')) {
+        speak("ছায়াবৃত্তে লুকানো এই মন,
+               আজ ডুবে গেছে সন্ধ্যায়,
+               দিগন্ত যেন লাল ও পূর্ব কোণ,
+               কি জানি ? কখন যে ঊষা হয়।
+               কুয়াশার চাদরে ঢাকা তুমি–
+               মুক্তা খচিত আয়না।
+               এসেছে নতুন আরেক দিন,
+               কোথায়?
+               ঊষার দেখা তো পাই না।
+               কোথায় ঊষা ? কোথায় তুমি ?
+               আছি তোমারি প্রতিক্ষায়।
+               কোথায় তোমার ঝিলিমিলি আলো ? 
+               যা আসে ভোরের সূচনায়।
+               ঝাপসা ধূসর ধূপের মাঝে আমি
+               যে জায়গা করে নিতে চায়।
+               নিশির পরের ঊষা তুমি,
+               থাকি তোমারি অপেক্ষায়।
+               তুমি ছাড়া আদৌ কি–
+               ভোর কখনও হয়?
+               তাহলে কেন আমার শুরু তুমি ছাড়া?
+               রইবো তোমারই অপেক্ষায়।"");
+      } else if (command.includes('fantastic')) {
+        speak("Thanks for your appreciation,sir");
+      } else {
+        speak(
+          "Thanks for asking me your problem sir.But it seems like I am not programmed to solve this task.So i am sorry."
+          );
+      }
+    }
+
+    function isMathExpression(command) {
+      return /^[0-9+\-*/().\s]+$/.test(command);
+    }
+
+    function calculateExpression(expression) {
+      try {
+        return eval(expression);
+      } catch {
+        return "an error occurred while calculating";
+      }
+    }
+
+    function interactOp() {
+      userInput.style.height = "50px";
+    }
+
+    function theme() {
+      document.getElementById("default").pause();
+      document.getElementById("video").src = "./audio/jarvis.mp4";
+      document.getElementById("play").load();
+      document.getElementById("play").play();
+      document.getElementById("audio").src = "./audio/techSound.mp3";
+      document.getElementById("audio").play();
+    }
+
+    document.getElementById("playButton").addEventListener("click", () => {
+      document.getElementById("playButton").style.display = "none";
+      document.getElementById("start").play();
+      document.getElementById("default").play();
+      document.getElementById("play").play();
+    });
+
+    userInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && userInput.value.trim() !== "") {
+        const message = userInput.value.trim();
+        addMessage("User", message);
+        processCommand(message.toLowerCase());
+        userInput.value = "";
+      }
+    });
+    document.getElementById('open').onclick = function open() {
+      let url = prompt('enter url,warisa will open it for you');
+      iframe.style.height = "80%";
+      iframe.style.width = "80%";
+      iframe.src = url;
+    }
+    document.getElementById('cmd').onmouseover = function hover() {
+      document.getElementById('commandList').style.width = '250px';
+      document.getElementById('pre').style.display = 'block'
+    }
+    document.getElementById('cmd').onmouseout = function unhover() {
+      document.getElementById('commandList').style.width = '0px';
+      document.getElementById('pre').style.display = 'none'
+    }
+  
+`
+    const messagesDiv = document.getElementById("chat-messages");
+    const userInput = document.getElementById("user-input");
+    const speakButton = document.getElementById("speak-btn");
+    const audioPlayer = document.getElementById("audio-player");
+    const iframe = document.getElementById("iframe-display");
+
+    const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    let lastTranscript = "";
+    let isListening = false;
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[event.results.length - 1][0].transcript.trim();
+      if (transcript === lastTranscript) return;
+      lastTranscript = transcript;
+
+      addMessage("User", transcript);
+      processCommand(transcript.toLowerCase());
+      stopRecognition();
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      stopRecognition();
+    };
+
+    function startRecognition() {
+      recognition.start();
+      speakButton.textContent = "Listening...";
+      isListening = true;
+    }
+
+    function stopRecognition() {
+      recognition.stop();
+      speakButton.textContent = "Speak";
+      isListening = false;
+    }
+
+    speakButton.addEventListener("click", () => {
+      if (!isListening) {
+        startRecognition();
+      } else {
+        stopRecognition();
+      }
+    });
+
+    const synth = window.speechSynthesis;
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      synth.speak(utterance);
+      addMessage("Wariva", text);
+    }
+
+    function addMessage(sender, message) {
+      const messageElement = document.createElement("div");
+      messageElement.textContent = `${sender}: ${message}`;
+      messagesDiv.appendChild(messageElement);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function processCommand(command) {
+      if (command.includes("play distance")) {
+        audioPlayer.play();
+        speak("Playing distance.");
+      } else if (command.includes("stop")) {
+        audioPlayer.pause();
+        speak("stop");
+      } else if (command.includes("open prothom alo")) {
+        iframe.style.height = "90%";
+        iframe.style.width = "90%";
+        iframe.src = "https://www.prothomalo.com";
+        speak("Opening prothom alo.");
+      } else if (isMathExpression(command)) {
+        const result = calculateExpression(command);
+        speak(`The result is ${result},easy peasy`);
+      } else if (command.includes("andy")) {
+        iframe.style.height = "70%";
+        iframe.style.width = "90%";
+        iframe.src = "https://andisearch.com/";
+        iframe.style.zIndex = '5';
+        speak("andi activated sir.");
+      } else if (command.includes("refresh")) {
+        iframe.style.height = "0%";
+        iframe.style.width = "0%";
+        speak("refreshing sir.");
+      } else if (command.includes('hello')) {
+        speak("hello sir,I am wariva.Do you need any help?");
+      } else if (command.includes('reload programme')) {
+        speak("programme is reloaded.Wariva is ready to run");
+      } else if (command.includes('arise')) {
+        speak(
+          "Wariva activated sir.Hello sir,allow me to introduce myself,I am wariva.Your wide range architectural vertual artificial intelligence,and i am here to assist you with a variety of tasks as best a I can,24 hours a day,7 days a week.Importing all preferences from home inerface.System are now fully operational.I am dedicated to that person who blocks my creator in facebook and instagram.Mybe request that person to unblock my creator please."
+        );
+      } else if (command.includes('explain your functionalities')) {
+        speak(
+          "Sure sir.I am created with html,css and javascript.Html and css for my user interface and javascript works as my functional tasks.My full name is Andi Wariva PI Zero One.Pi Zero One means Point Infinity One.It indicates my version.However you can get my source code if you say 'source code'"
+        );
+      } else if (command.includes('say hello to my sir')) {
+        speak("hello,Probir sir.Nice meeting you.How are you?");
+      } else if (command.includes('say hello to my friends')) {
+        speak("Hello every one.How are you?Hey Warisa!What's up?Do you like it?");
+      } else if (command.includes('tell me about your features')) {
+        speak(
+          "I can do basic mathematical operation,I can play song for you,can hear u joke and can motivate you by generating quotes and i can also recite poem.I can answer any of your out knowledge and general related question as i am collaborated with andi search engine.Just say andi to activate it and then write your question.It can also help you in generating paragraph and story writing and many more.I can also open prothom alo and wikipedia if needed.If you click the open button u can open any website by writing the domain in it"
+        );
+      } else if (command.includes("open wikipedia")) {
+        iframe.style.height = "90%";
+        iframe.style.width = "90%";
+        iframe.src = "https://bn.m.wikipedia.org/wiki/";
+        speak("opening wikipedia.");
+      } else if (command.includes("show me your mentality")) {
+        iframe.style.height = "80%";
+        iframe.style.width = "80%";
+        iframe.src = "https://www.youtube.com/embed/w7fmbiQzp5k?si=hifIHjhy-KbFw_KN";
+        speak("this video reflects my mentality sir.");
+      } else if (command.includes('can you speak bangla')) {
+        speak(
+          "আমি একটু আক্ টু বাংলা বলতে পারি।তবে আপনি আমার সাথে বাংলায় কথা বলতে বা টেক্সট করতে পারবেন না যেহেতু আমার বাংলা ভাষা প্রোগ্রাম করা নাই।তবে আমি আপনাকে বাংলায় কৌতুক আর কবিতা শোনাতে পারি"
+        );
+      } else if (command.includes('tell me a joke')) {
+        speak(`${`ছ্যার:বল্টু,বলো দেখি?চাঁদ দূরে?নাকি লন্ডন দূরে?
+               বল্টু:লন্ডন দূরে ছ্যার।
+               ছ্যার:কেন?
+               বল্টু:ছ্যার!আমার বাসা থেকে তো আকাশে চাঁদ দেখা যায়,তবে লন্ডন তো দেখা যায় না।`}`);
+      } else if (command.includes('recite a poem')) {
+        speak(`ছায়াবৃত্তে লুকানো এই মন,
+               আজ ডুবে গেছে সন্ধ্যায়,
+               দিগন্ত যেন লাল ও পূর্ব কোণ,
+               কি জানি ? কখন যে ঊষা হয়।
+               কুয়াশার চাদরে ঢাকা তুমি–
+               মুক্তা খচিত আয়না।
+               এসেছে নতুন আরেক দিন,
+               কোথায়?
+               ঊষার দেখা তো পাই না।
+               কোথায় ঊষা ? কোথায় তুমি ?
+               আছি তোমারি প্রতিক্ষায়।
+               কোথায় তোমার ঝিলিমিলি আলো ? 
+               যা আসে ভোরের সূচনায়।
+               ঝাপসা ধূসর ধূপের মাঝে আমি
+               যে জায়গা করে নিতে চায়।
+               নিশির পরের ঊষা তুমি,
+               থাকি তোমারি অপেক্ষায়।
+               তুমি ছাড়া আদৌ কি–
+               ভোর কখনও হয়?
+               তাহলে কেন আমার শুরু তুমি ছাড়া?
+               রইবো তোমারই অপেক্ষায়।`);
+      } else if (command.includes('fantastic')) {
+        speak("Thanks for your appreciation,sir");
+      } else if (command.includes('source code')) {
+        alert(`${srcCode}`);
+      } else if (command.includes('i am fine') || command.includes('i am fine what about you') || command.includes(
+          'he is fine')) {
+        speak("Thanks. I am fine also.");
+      } else if (command.includes('yes') || command.includes('maybe')) {
+        speak("Thanks");
+      } else if (command.includes('share your powerful quotes')) {
+        speak(
+          "you have the power to overcome anything.Every failure is a step to achieve your success.So keep pushing forward until you reach your goal.Remember great power comes with great responsibilities.Silence and words are your power.The quiter you are the more you will able to hear "
+        );
+      } else if (command.includes('copy from kali linux')) {
+        speak('hi hi hi maybe');
+      } else {
+        speak(
+          "Thanks for asking me your problem sir.But it seems like I am not programmed to solve this task.So i am sorry."
+        );
+      }
+    }
+
+    function isMathExpression(command) {
+      return /^[0-9+\-*/().\s]+$/.test(command);
+    }
+
+    function calculateExpression(expression) {
+      try {
+        return eval(expression);
+      } catch {
+        return "an error occurred while calculating";
+      }
+    }
+
+    function interactOp() {
+      userInput.style.height = "50px";
+    }
+
+    function theme() {
+      document.getElementById("default").pause();
+      document.getElementById("video").src = "./audio/jarvis.mp4";
+      document.getElementById("play").load();
+      document.getElementById("play").play();
+      document.getElementById("audio").src = "./audio/techSound.mp3";
+      document.getElementById("audio").play();
+    }
+
+    document.getElementById("playButton").addEventListener("click", () => {
+      document.getElementById("playButton").style.display = "none";
+      document.getElementById("start").play();
+      document.getElementById("default").play();
+      document.getElementById("play").play();
+    });
+
+    userInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && userInput.value.trim() !== "") {
+        const message = userInput.value.trim();
+        addMessage("User", message);
+        processCommand(message.toLowerCase());
+        userInput.value = "";
+      }
+    });
+    document.getElementById('open').onclick = function open() {
+      let url = prompt('enter url,warisa will open it for you');
+      iframe.style.height = "80%";
+      iframe.style.width = "80%";
+      iframe.src = url;
+    }
+    document.getElementById('cmd').onmouseover = function hover() {
+      document.getElementById('commandList').style.width = '250px';
+      document.getElementById('pre').style.display = 'block'
+    }
+    document.getElementById('cmd').onmouseout = function unhover() {
+      document.getElementById('commandList').style.width = '0px';
+      document.getElementById('pre').style.display = 'none'
+    }
+  </script>
+</body>
+
+</html>
